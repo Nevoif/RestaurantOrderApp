@@ -15,6 +15,8 @@ namespace RestaurantApp.ViewModels
         private int _insideTables;
         private int _outsideTables;
         private string _defaultPrinterName = string.Empty;
+        private string _networkPrinterIP = "192.168.1.100";
+        private int _networkPrinterPort = 9100;
         private string _selectedLanguage = "English";
         private ObservableCollection<string> _availablePrinters = new();
         private ObservableCollection<string> _availableLanguages = new() { "English", "Turkish" };
@@ -40,6 +42,18 @@ namespace RestaurantApp.ViewModels
         {
             get => _defaultPrinterName;
             set => SetProperty(ref _defaultPrinterName, value);
+        }
+
+        public string NetworkPrinterIP
+        {
+            get => _networkPrinterIP;
+            set => SetProperty(ref _networkPrinterIP, value);
+        }
+
+        public int NetworkPrinterPort
+        {
+            get => _networkPrinterPort;
+            set => SetProperty(ref _networkPrinterPort, value);
         }
 
         public string SelectedLanguage
@@ -92,6 +106,8 @@ namespace RestaurantApp.ViewModels
         public string LocalizedTablesTab => Localization.GetString("TablesTab");
         public string LocalizedLanguageLabel => Localization.GetString("LanguageLabel");
         public string LocalizedPrinterConfigLabel => Localization.GetString("PrinterConfigLabel");
+        public string LocalizedNetworkPrinterIPLabel => Localization.GetString("NetworkPrinterIPLabel");
+        public string LocalizedNetworkPrinterPortLabel => Localization.GetString("NetworkPrinterPortLabel");
         public string LocalizedMenuItemsLabel => Localization.GetString("MenuItemsLabel");
         public string LocalizedEditItemLabel => Localization.GetString("EditItemLabel");
         public string LocalizedNameLabel => Localization.GetString("NameLabel");
@@ -130,6 +146,8 @@ namespace RestaurantApp.ViewModels
             InsideTables = settings.InsideTables;
             OutsideTables = settings.OutsideTables;
             DefaultPrinterName = settings.DefaultPrinterName ?? string.Empty;
+            NetworkPrinterIP = settings.NetworkPrinterIP ?? "192.168.1.100";
+            NetworkPrinterPort = settings.NetworkPrinterPort > 0 ? settings.NetworkPrinterPort : 9100;
             SelectedLanguage = settings.Language ?? "English";
 
             foreach (var item in settings.MenuItems)
@@ -228,6 +246,8 @@ namespace RestaurantApp.ViewModels
             _settings.OutsideTables = OutsideTables;
             _settings.TotalTables = Tables.Count;
             _settings.DefaultPrinterName = DefaultPrinterName;
+            _settings.NetworkPrinterIP = NetworkPrinterIP;
+            _settings.NetworkPrinterPort = NetworkPrinterPort;
             _settings.Language = SelectedLanguage;
             _settings.MenuItems = MenuItems.ToList();
             _settings.Tables = Tables.ToList();

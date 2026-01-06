@@ -110,13 +110,18 @@ namespace RestaurantApp.ViewModels
         public string LocalizedDeleteButton => _localization.GetString("DeleteButton");
         public string LocalizedTableOrderLabel => _localization.GetString("CurrentOrderLabel");
         public string LocalizedQtyLabel => _localization.GetString("QuantityLabel");
+        public string LocalizedCheckoutCreditCard => _localization.GetString("CheckoutCreditCardButton");
+        public string LocalizedCheckoutCash => _localization.GetString("CheckoutCashButton");
+        public string LocalizedPrintReceiptButton => _localization.GetString("PrintReceiptButton");
 
         public System.Windows.Input.ICommand SelectTableCommand { get; }
         public System.Windows.Input.ICommand SelectItemCommand { get; }
         public System.Windows.Input.ICommand AddToOrderCommand { get; }
         public System.Windows.Input.ICommand RemoveFromOrderCommand { get; }
         public System.Windows.Input.ICommand PrintOrderCommand { get; }
-        public System.Windows.Input.ICommand CheckoutCommand { get; }
+        public System.Windows.Input.ICommand PrintReceiptCommand { get; }
+        public System.Windows.Input.ICommand CheckoutCreditCardCommand { get; }
+        public System.Windows.Input.ICommand CheckoutCashCommand { get; }
         public System.Windows.Input.ICommand CancelCommand { get; }
         public System.Windows.Input.ICommand SettingsCommand { get; }
         public System.Windows.Input.ICommand EarningsCommand { get; }
@@ -129,7 +134,9 @@ namespace RestaurantApp.ViewModels
             AddToOrderCommand = new RelayCommand(AddToOrder, _ => SelectedMenuItem != null && SelectedTableOrder != null);
             RemoveFromOrderCommand = new RelayCommand(RemoveFromOrder, _ => SelectedTableOrder != null);
             PrintOrderCommand = new RelayCommand(PrintOrder, _ => SelectedTableOrder != null && SelectedTableOrder.OrderItems.Any(i => !i.IsPrinted));
-            CheckoutCommand = new RelayCommand(CheckoutTable, _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
+            PrintReceiptCommand = new RelayCommand(PrintReceipt, _ => SelectedTableOrder != null && SelectedTableOrder.OrderItems.Count > 0);
+            CheckoutCreditCardCommand = new RelayCommand(o => CheckoutTableWithPayment(PaymentMethod.CreditCard), _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
+            CheckoutCashCommand = new RelayCommand(o => CheckoutTableWithPayment(PaymentMethod.Cash), _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
             CancelCommand = new RelayCommand(CancelTable, _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
             SettingsCommand = new RelayCommand(OpenSettings);
             EarningsCommand = new RelayCommand(OpenEarnings);
@@ -141,6 +148,9 @@ namespace RestaurantApp.ViewModels
         private void LoadData()
         {
             Settings = _dataService.LoadSettings();
+            
+            // Configure network printer settings
+            _printerService.SetNetworkPrinterIP(Settings.NetworkPrinterIP, Settings.NetworkPrinterPort);
             
             // Set up localization
             _localization.CurrentLanguage = Settings.Language == "Turkish" 
@@ -346,15 +356,18 @@ namespace RestaurantApp.ViewModels
             }
         }
 
-        private void CheckoutTable(object? obj)
+        private void CheckoutTableWithPayment(PaymentMethod paymentMethod)
         {
             if (SelectedTableOrder == null)
                 return;
 
             var total = _localization.FormatCurrency(SelectedTableOrder.GetTotal());
+            string paymentText = paymentMethod == PaymentMethod.CreditCard 
+                ? _localization.GetString("PaymentMethodCreditCard")
+                : _localization.GetString("PaymentMethodCash");
 
             var result = System.Windows.MessageBox.Show(
-                $"{_localization.GetString("ConfirmCheckout")}\n{_localization.GetString("TotalLabel")}: {total}",
+                $"{_localization.GetString("ConfirmCheckout")}\n{_localization.GetString("TotalLabel")}: {total}\n{_localization.GetString("PaymentMethodLabel")}: {paymentText}",
                 _localization.GetString("CheckoutButton"),
                 System.Windows.MessageBoxButton.YesNo
             );
@@ -362,6 +375,7 @@ namespace RestaurantApp.ViewModels
             if (result == System.Windows.MessageBoxResult.Yes)
             {
                 SelectedTableOrder.Status = OrderStatus.CheckedOut;
+                SelectedTableOrder.PaymentMethod = paymentMethod;
                 SelectedTableOrder.CheckedOutAt = DateTime.Now;
                 _dataService.SaveCheckout(SelectedTableOrder);
                 
@@ -371,6 +385,36 @@ namespace RestaurantApp.ViewModels
                 SelectedTableOrder = null;
                 CurrentOrderItems.Clear();
             }
+        }
+
+        private void PrintReceipt(object? obj)
+        {
+            if (SelectedTableOrder == null || SelectedTableOrder.OrderItems.Count == 0)
+                return;
+
+            string printerName = Settings.DefaultPrinterName ?? "";
+            
+            if (string.IsNullOrEmpty(printerName))
+            {
+                var printers = _printerService.GetAvailablePrinters();
+                if (printers.Count == 0)
+                {
+                    System.Windows.MessageBox.Show("No printers found. Please configure a printer.");
+                    return;
+                }
+                printerName = printers[0];
+            }
+
+            var receiptStrings = new Dictionary<string, string>
+            {
+                { "Header", _localization.GetString("ReceiptHeader") },
+                { "Table", _localization.GetString("ReceiptTable") },
+                { "Time", _localization.GetString("ReceiptTime") },
+                { "Total", _localization.GetString("ReceiptTotal") },
+                { "ThankYou", _localization.GetString("ReceiptThankYou") }
+            };
+
+            _printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, onlyNewItems: false);
         }
 
         private void CancelTable(object? obj)

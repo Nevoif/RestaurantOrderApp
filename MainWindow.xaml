@@ -28,15 +28,15 @@
                         HorizontalAlignment="Left" VerticalAlignment="Center"
                         Padding="15,10" MinWidth="140">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="💰" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="18"/>
-                        <TextBlock Text="{Binding LocalizedEarningsButton}" VerticalAlignment="Center" FontSize="14" FontWeight="Bold"/>
+                        <TextBlock Text="💰" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="22"/>
+                        <TextBlock Text="{Binding LocalizedEarningsButton}" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
                 
                 <!-- Center: Title -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="🍴" FontSize="20" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding LocalizedTitle}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                    <TextBlock Text="🍴" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LocalizedTitle}" FontSize="26" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                 </StackPanel>
                 
                 <!-- Right: Settings -->
@@ -44,8 +44,8 @@
                         Style="{StaticResource DarkButtonStyle}" 
                         HorizontalAlignment="Right" Padding="15,5">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⚙️" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="18"/>
-                        <TextBlock Text="{Binding LocalizedSettingsButton}" VerticalAlignment="Center" FontSize="14" FontWeight="Bold"/>
+                        <TextBlock Text="⚙️" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="22"/>
+                        <TextBlock Text="{Binding LocalizedSettingsButton}" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -62,7 +62,7 @@
             <!-- Left Panel - Tables (2 Column Layout) -->
             <Border Grid.Column="0" Background="{StaticResource SecondaryBrush}" Padding="15" BorderThickness="0,0,1,0" BorderBrush="{StaticResource BorderBrush}">
                 <StackPanel>
-                    <TextBlock Text="{Binding LocalizedTablesLabel}" FontSize="16" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <TextBlock Text="{Binding LocalizedTablesLabel}" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
                     
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding Tables}">
@@ -90,8 +90,8 @@
                                             </Style>
                                         </Button.Style>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="12"/>
-                                            <TextBlock Text="{Binding HasActiveOrder, Converter={StaticResource OccupancyConverter}}" FontSize="10" Foreground="{StaticResource LightTextBrush}"/>
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="Bold" FontSize="14"/>
+                                            <TextBlock Text="{Binding HasActiveOrder, Converter={StaticResource OccupancyConverter}}" FontSize="12" Foreground="{StaticResource LightTextBrush}"/>
                                         </StackPanel>
                                     </Button>
                                 </DataTemplate>
@@ -176,7 +176,7 @@
                             BorderThickness="0,1,0,0" BorderBrush="{StaticResource BorderBrush}"
                             Visibility="{Binding SelectedMenuItem, Converter={StaticResource NullToVisConverter}}">
                         <StackPanel>
-                            <TextBlock Text="{Binding LocalizedToppingsLabel}" FontWeight="Bold" FontSize="18" Margin="0,0,0,15" Foreground="White"/>
+                            <TextBlock Text="{Binding LocalizedToppingsLabel}" FontWeight="Bold" FontSize="20" Margin="0,0,0,15" Foreground="White"/>
                             <ItemsControl ItemsSource="{Binding SelectedMenuItem.AvailableToppings}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -190,11 +190,11 @@
                                                   Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.ToggleToppingCommand}"
                                                   CommandParameter="{Binding .}">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Name}" Margin="0,0,5,0" FontSize="16" Foreground="White"/>
-                                                <TextBlock Text="(+" FontSize="16" Foreground="White"/>
-                                                <TextBlock Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.CurrencySymbol}" FontSize="16" Foreground="White"/>
-                                                <TextBlock Text="{Binding Price, StringFormat=0:F2}" FontSize="16" Foreground="White"/>
-                                                <TextBlock Text=")" FontSize="16" Foreground="White"/>
+                                                <TextBlock Text="{Binding Name}" Margin="0,0,5,0" FontSize="18" Foreground="White"/>
+                                                <TextBlock Text="(+" FontSize="18" Foreground="White"/>
+                                                <TextBlock Text="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.CurrencySymbol}" FontSize="18" Foreground="White"/>
+                                                <TextBlock Text="{Binding Price, StringFormat=0:F2}" FontSize="18" Foreground="White"/>
+                                                <TextBlock Text=")" FontSize="18" Foreground="White"/>
                                             </StackPanel>
                                         </CheckBox>
                                     </DataTemplate>
@@ -212,8 +212,8 @@
                     <Border Background="{StaticResource PrimaryBrush}" Padding="10" CornerRadius="4" Margin="0,0,0,15">
                         <StackPanel>
                             <TextBlock Text="{Binding LocalizedSelectedItemLabel}" FontWeight="Bold" Margin="0,0,0,5"/>
-                            <TextBlock Text="{Binding SelectedMenuItem.Name}" FontSize="14"/>
-                            <TextBlock Text="{Binding SelectedMenuItem.Price, StringFormat='0.00\u20ba'}" Foreground="{StaticResource AccentBrush}" FontSize="14"/>
+                            <TextBlock Text="{Binding SelectedMenuItem.Name}" FontSize="16"/>
+                            <TextBlock Text="{Binding SelectedMenuItem.Price, StringFormat='0.00\u20ba'}" Foreground="{StaticResource AccentBrush}" FontSize="16"/>
                             
                             <TextBlock Text="{Binding LocalizedQuantityLabel}" FontWeight="Bold" Margin="0,10,0,5"/>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
@@ -228,7 +228,7 @@
                     </Border>
 
                     <!-- Order Items -->
-                    <TextBlock Text="{Binding LocalizedTableOrderLabel}" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="{Binding LocalizedTableOrderLabel}" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
                     <ScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding CurrentOrderItems}">
                             <ItemsControl.ItemTemplate>
@@ -283,15 +283,21 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding LocalizedTotalLabel}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding LocalizedTotalLabel}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
                                 <TextBlock Grid.Column="1" Text="{Binding CurrentOrderTotal}" 
-                                          FontSize="24" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                          FontSize="28" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
                             </Grid>
                             
                             <Button Content="{Binding LocalizedPrintButton}" Command="{Binding PrintOrderCommand}" 
                                     Style="{StaticResource DarkButtonStyle}" Margin="0,0,0,10" Height="45"/>
-                            <Button Content="{Binding LocalizedCheckoutButton}" Command="{Binding CheckoutCommand}" 
-                                    Style="{StaticResource DarkButtonStyle}" Height="45" Background="#28a745" Margin="0,0,0,10"/>
+                            <Button Content="{Binding LocalizedPrintReceiptButton}" Command="{Binding PrintReceiptCommand}" 
+                                    Style="{StaticResource DarkButtonStyle}" Margin="0,0,0,10" Height="45" Background="#FF8C00"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Button Content="{Binding LocalizedCheckoutCreditCard}" Command="{Binding CheckoutCreditCardCommand}" 
+                                        Style="{StaticResource DarkButtonStyle}" Height="45" Background="#0066cc" Margin="0,0,5,0" />
+                                <Button Content="{Binding LocalizedCheckoutCash}" Command="{Binding CheckoutCashCommand}" 
+                                        Style="{StaticResource DarkButtonStyle}" Height="45" Background="#28a745"/>
+                            </StackPanel>
                             <Button Content="{Binding LocalizedCancelButton}" Command="{Binding CancelCommand}" 
                                     Style="{StaticResource DarkButtonStyle}" Height="45" Background="#dc3545"/>
                         </StackPanel>

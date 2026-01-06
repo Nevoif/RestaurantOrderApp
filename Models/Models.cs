@@ -152,6 +152,7 @@ namespace RestaurantApp.Models
         private DateTime _orderedAt = DateTime.Now;
         private DateTime? _checkedOutAt;
         private OrderStatus _status = OrderStatus.Active;
+        private PaymentMethod _paymentMethod = PaymentMethod.None;
 
         public int TableNumber
         {
@@ -183,6 +184,12 @@ namespace RestaurantApp.Models
         {
             get => _status;
             set => SetProperty(ref _status, value);
+        }
+
+        public PaymentMethod PaymentMethod
+        {
+            get => _paymentMethod;
+            set => SetProperty(ref _paymentMethod, value);
         }
 
         public decimal Total => GetTotal();
@@ -235,12 +242,21 @@ namespace RestaurantApp.Models
         Cancelled
     }
 
+    public enum PaymentMethod
+    {
+        None,
+        CreditCard,
+        Cash
+    }
+
     public class AppSettings
     {
         public int TotalTables { get; set; } = 10;
         public int InsideTables { get; set; } = 6;
         public int OutsideTables { get; set; } = 4;
         public string DefaultPrinterName { get; set; } = string.Empty;
+        public string NetworkPrinterIP { get; set; } = "192.168.1.100";
+        public int NetworkPrinterPort { get; set; } = 9100;
         public List<MenuItem> MenuItems { get; set; } = new();
         public List<Table> Tables { get; set; } = new();
         public string Language { get; set; } = "English"; // language change

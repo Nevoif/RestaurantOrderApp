@@ -14,6 +14,7 @@
             <local:NullToBoolConverter x:Key="NullToBoolConverter"/>
             <local:NullToVisibilityConverter x:Key="NullToVisConverter"/>
             <local:StatusConverter x:Key="StatusConverter"/>
+            <local:PaymentMethodConverter x:Key="PaymentMethodConverter"/>
             <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
             
             <!-- Dark Theme Colors -->

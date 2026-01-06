@@ -10,7 +10,7 @@ namespace RestaurantApp.ViewModels
     {
         private readonly DataService _dataService;
         private readonly MainViewModel _mainViewModel;
-        private string _selectedMonth;
+        private string _selectedMonth = string.Empty;
         private ObservableCollection<TableOrder> _checkouts = new();
         private decimal _totalEarnings;
 
@@ -47,6 +47,7 @@ namespace RestaurantApp.ViewModels
         public string LocalizedTotalLabel => _mainViewModel.Localization.GetString("TotalLabel");
         public string LocalizedTableLabel => _mainViewModel.Localization.GetString("Table");
         public string LocalizedTimeLabel => _mainViewModel.Localization.GetString("Time");
+        public string LocalizedPaymentMethodLabel => _mainViewModel.Localization.GetString("PaymentMethod");
         public string LocalizedStatusLabel => _mainViewModel.Localization.GetString("Status");
         public string LocalizedItemsLabel => _mainViewModel.Localization.GetString("ItemsLabel");
         public string LocalizedCloseButton => _mainViewModel.Localization.GetString("CloseButton");
