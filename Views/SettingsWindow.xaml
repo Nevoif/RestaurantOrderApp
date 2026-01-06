@@ -1,0 +1,171 @@
+<Window x:Class="RestaurantApp.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding LocalizedSettingsTitle}" Height="700" Width="900"
+        Background="#1E1E1E"
+        Foreground="#FFFFFF"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Margin="15">
+            <!-- General Settings Tab -->
+            <TabItem Header="{Binding LocalizedGeneralTab}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <Border Background="#2D2D2D" Padding="20" CornerRadius="8" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="{Binding LocalizedLanguageLabel}" FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource AccentBrush}"/>
+                                <ComboBox ItemsSource="{Binding AvailableLanguages}" 
+                                          SelectedItem="{Binding SelectedLanguage}"
+                                          Padding="10" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="#2D2D2D" Padding="20" CornerRadius="8" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="{Binding LocalizedPrinterConfigLabel}" FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="{StaticResource AccentBrush}"/>
+                                <ComboBox ItemsSource="{Binding AvailablePrinters}" 
+                                          SelectedItem="{Binding DefaultPrinterName}"
+                                          Padding="10" Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Menu Management Tab -->
+            <TabItem Header="{Binding LocalizedMenuManagementTab}">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#2D2D2D" CornerRadius="8" Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding LocalizedMenuItemsLabel}" Foreground="{StaticResource AccentBrush}" Margin="15,15,15,10" FontWeight="Bold" FontSize="16"/>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding MenuItems}" SelectedItem="{Binding SelectedMenuItem}"
+                                     Background="Transparent" BorderThickness="0" Margin="5">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Name}" Padding="5"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                <Button Content="+" Command="{Binding AddMenuItemCommand}" Width="50" Height="40" Margin="5" Style="{StaticResource DarkButtonStyle}"/>
+                                <Button Content="-" Command="{Binding DeleteMenuItemCommand}" CommandParameter="{Binding SelectedMenuItem}" Width="50" Height="40" Margin="5" Style="{StaticResource SecondaryButtonStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1" Background="#2D2D2D" CornerRadius="8" Padding="20" IsEnabled="{Binding SelectedMenuItem, Converter={StaticResource NullToBoolConverter}}">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <TextBlock Text="{Binding LocalizedEditItemLabel}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{StaticResource AccentBrush}"/>
+                                
+                                <TextBlock Text="{Binding LocalizedNameLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding SelectedMenuItem.Name, UpdateSourceTrigger=PropertyChanged}" Padding="10" Margin="0,0,0,15"/>
+
+                                <TextBlock Text="{Binding LocalizedCategoryLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                                <ComboBox SelectedValue="{Binding SelectedMenuItem.Category, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Content" Padding="10" Margin="0,0,0,15">
+                                    <ComboBoxItem Content="Main"/>
+                                    <ComboBoxItem Content="Drink"/>
+                                </ComboBox>
+
+                                <TextBlock Text="{Binding LocalizedPriceLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding SelectedMenuItem.Price, UpdateSourceTrigger=PropertyChanged}" Padding="10" Margin="0,0,0,20"/>
+
+                                <TextBlock Text="{Binding LocalizedToppingsLabel}" FontSize="16" FontWeight="Bold" Margin="0,10,0,10" Foreground="{StaticResource AccentBrush}"/>
+                                <Border BorderThickness="1" BorderBrush="{StaticResource BorderBrush}" CornerRadius="4" Margin="0,0,0,10">
+                                    <ListBox ItemsSource="{Binding SelectedMenuItem.AvailableToppings}" Height="200" Background="Transparent" BorderThickness="0">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="80"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" Margin="2" Padding="5"/>
+                                                    <TextBox Text="{Binding Price, UpdateSourceTrigger=PropertyChanged}" Grid.Column="1" Margin="5,2" Padding="5"/>
+                                                    <Button Content="✕" Command="{Binding DataContext.DeleteToppingCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Grid.Column="2" Background="Transparent" Foreground="#FF4444" BorderThickness="0" FontWeight="Bold" FontSize="16" Cursor="Hand" VerticalAlignment="Center" Padding="5"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </Border>
+                                <Button Content="{Binding LocalizedAddToppingButton}" Command="{Binding AddToppingCommand}" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- Table Management Tab -->
+            <TabItem Header="{Binding LocalizedTablesTab}">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Background="#2D2D2D" CornerRadius="8" Margin="0,0,10,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="{Binding LocalizedTablesLabel}" Foreground="{StaticResource AccentBrush}" Margin="15,15,15,10" FontWeight="Bold" FontSize="16"/>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding Tables}" SelectedItem="{Binding SelectedTable}"
+                                     Background="Transparent" BorderThickness="0" Margin="5">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DisplayName}" Padding="5"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                                <Button Content="+" Command="{Binding AddTableCommand}" Width="50" Height="40" Margin="5" Style="{StaticResource DarkButtonStyle}"/>
+                                <Button Content="-" Command="{Binding DeleteTableCommand}" CommandParameter="{Binding SelectedTable}" Width="50" Height="40" Margin="5" Style="{StaticResource SecondaryButtonStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Column="1" Background="#2D2D2D" CornerRadius="8" Padding="20" IsEnabled="{Binding SelectedTable, Converter={StaticResource NullToBoolConverter}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding LocalizedEditTableLabel}" FontSize="18" FontWeight="Bold" Margin="0,0,0,20" Foreground="{StaticResource AccentBrush}"/>
+
+                            <TextBlock Text="{Binding LocalizedDisplayNameLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding SelectedTable.DisplayName, UpdateSourceTrigger=PropertyChanged}" Padding="10" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="{Binding LocalizedTableNumberLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                            <TextBox Text="{Binding SelectedTable.Number, UpdateSourceTrigger=PropertyChanged}" Padding="10" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="{Binding LocalizedLocationLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                            <ComboBox SelectedValue="{Binding SelectedTable.Location, UpdateSourceTrigger=PropertyChanged}" SelectedValuePath="Content" Padding="10">
+                                <ComboBoxItem Content="inside"/>
+                                <ComboBoxItem Content="outside"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Save Button -->
+        <Button Grid.Row="1" Content="{Binding LocalizedSaveAllSettingsButton}" Click="SaveButton_Click"
+                Style="{StaticResource DarkButtonStyle}" Height="50" Margin="20,0,20,20"/>
+    </Grid>
+</Window>

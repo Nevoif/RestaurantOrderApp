@@ -1,0 +1,91 @@
+<Window x:Class="RestaurantApp.Views.EarningsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{Binding LocalizedEarningsTitle}" Height="700" Width="1000"
+        Background="#1E1E1E"
+        Foreground="#FFFFFF"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header / Month Selection -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <StackPanel Margin="0,0,20,0">
+                <TextBlock Text="{Binding LocalizedMonthLabel}" Foreground="{StaticResource LightTextBrush}" Margin="0,0,0,5"/>
+                <ComboBox ItemsSource="{Binding AvailableMonths}" 
+                          SelectedItem="{Binding SelectedMonth}"
+                          Width="200" Padding="10"/>
+            </StackPanel>
+            
+            <Border Background="#2D2D2D" Padding="20,10" CornerRadius="8" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding LocalizedTotalLabel}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text=": " FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding FormattedTotalEarnings}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- Checkouts List -->
+        <Border Grid.Row="1" Background="#2D2D2D" CornerRadius="8" Padding="10">
+            <DataGrid ItemsSource="{Binding Checkouts}" AutoGenerateColumns="False" CanUserAddRows="False" 
+                      Background="Transparent" BorderThickness="0" Foreground="White"
+                      RowBackground="#3D3D3D" AlternatingRowBackground="#353535"
+                      GridLinesVisibility="None" HeadersVisibility="Column">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#252525"/>
+                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                        <Setter Property="Padding" Value="10,8"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="#444444"/>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{Binding DataContext.LocalizedTableLabel, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        Binding="{Binding TableNumber}" Width="80"/>
+                    <DataGridTextColumn Header="{Binding DataContext.LocalizedTimeLabel, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        Binding="{Binding CheckedOutAt, StringFormat=\{0:dd/MM/yyyy HH:mm:ss\}}" Width="180"/>
+                    <DataGridTextColumn Header="{Binding DataContext.LocalizedStatusLabel, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        Binding="{Binding Status, Converter={StaticResource StatusConverter}}" Width="120"/>
+                    <DataGridTemplateColumn Header="{Binding DataContext.LocalizedItemsLabel, RelativeSource={RelativeSource AncestorType=Window}}" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding OrderItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Quantity}" Margin="0,0,5,0"/>
+                                                <TextBlock Text="x "/>
+                                                <TextBlock Text="{Binding MenuItem.Name}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{Binding DataContext.LocalizedTotalLabel, RelativeSource={RelativeSource AncestorType=Window}}" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Converter={StaticResource TableOrderTotalConverter}}" 
+                                           FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                                           HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Footer -->
+        <Button Grid.Row="2" Content="{Binding LocalizedCloseButton}" Click="CloseButton_Click"
+                Style="{StaticResource SecondaryButtonStyle}" Height="40" Width="100" HorizontalAlignment="Right" Margin="0,20,0,0"/>
+    </Grid>
+</Window>
