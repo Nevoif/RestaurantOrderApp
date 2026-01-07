@@ -148,6 +148,7 @@ namespace RestaurantApp.Models
     {
         private int _tableNumber;
         private string _tableLocation = "inside";
+        private string _tableDisplayName = string.Empty;
         private ObservableCollection<OrderItem> _orderItems = new();
         private DateTime _orderedAt = DateTime.Now;
         private DateTime? _checkedOutAt;
@@ -163,6 +164,11 @@ namespace RestaurantApp.Models
         {
             get => _tableLocation;
             set => SetProperty(ref _tableLocation, value);
+        }
+        public string TableDisplayName
+        {
+            get => _tableDisplayName;
+            set => SetProperty(ref _tableDisplayName, value);
         }
         public ObservableCollection<OrderItem> OrderItems
         {
@@ -246,7 +252,8 @@ namespace RestaurantApp.Models
     {
         None,
         CreditCard,
-        Cash
+        Cash,
+        PackageOrder
     }
 
     public class AppSettings

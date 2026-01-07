@@ -27,11 +27,27 @@
                           Width="200" Padding="10"/>
             </StackPanel>
             
-            <Border Background="#2D2D2D" Padding="20,10" CornerRadius="8" VerticalAlignment="Bottom">
+            <Border Background="#2D2D2D" Padding="20,10" CornerRadius="8" VerticalAlignment="Bottom" Margin="0,0,15,0">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding LocalizedTotalLabel}" FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
                     <TextBlock Text=": " FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding FormattedTotalEarnings}" FontSize="28" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#2D2D2D" Padding="20,10" CornerRadius="8" VerticalAlignment="Bottom" Margin="0,0,15,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="💵 Cash" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text=": " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding FormattedCashEarnings}" FontSize="20" FontWeight="Bold" Foreground="#28a745" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#2D2D2D" Padding="20,10" CornerRadius="8" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="💳 Credit Card" FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text=": " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding FormattedCreditCardEarnings}" FontSize="20" FontWeight="Bold" Foreground="#007bff" VerticalAlignment="Center" Margin="10,0,0,0"/>
                 </StackPanel>
             </Border>
         </StackPanel>

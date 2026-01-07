@@ -181,7 +181,7 @@ namespace RestaurantApp.Services
                 CenterText(header, width),
                 "================================",
                 "",
-                $"{tableLabel}: {order.TableNumber,-6} | {order.TableLocation}",
+                $"{tableLabel}: {order.TableDisplayName}",
                 $"{timeLabel}: {order.OrderedAt:dd/MM/yyyy HH:mm:ss}",
                 "",
                 "--------------------------------"

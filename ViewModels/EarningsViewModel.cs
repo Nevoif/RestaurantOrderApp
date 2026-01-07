@@ -13,6 +13,8 @@ namespace RestaurantApp.ViewModels
         private string _selectedMonth = string.Empty;
         private ObservableCollection<TableOrder> _checkouts = new();
         private decimal _totalEarnings;
+        private decimal _cashEarnings;
+        private decimal _creditCardEarnings;
 
         public ObservableCollection<string> AvailableMonths { get; } = new();
 
@@ -40,7 +42,21 @@ namespace RestaurantApp.ViewModels
             set => SetProperty(ref _totalEarnings, value);
         }
 
+        public decimal CashEarnings
+        {
+            get => _cashEarnings;
+            set => SetProperty(ref _cashEarnings, value);
+        }
+
+        public decimal CreditCardEarnings
+        {
+            get => _creditCardEarnings;
+            set => SetProperty(ref _creditCardEarnings, value);
+        }
+
         public string FormattedTotalEarnings => _mainViewModel.Localization.FormatCurrency(TotalEarnings);
+        public string FormattedCashEarnings => _mainViewModel.Localization.FormatCurrency(CashEarnings);
+        public string FormattedCreditCardEarnings => _mainViewModel.Localization.FormatCurrency(CreditCardEarnings);
 
         public string LocalizedEarningsTitle => _mainViewModel.Localization.GetString("EarningsButton");
         public string LocalizedMonthLabel => _mainViewModel.Localization.GetString("MonthLabel");
@@ -86,16 +102,30 @@ namespace RestaurantApp.ViewModels
                 var loaded = _dataService.LoadMonthlyCheckouts(year, month);
                 Checkouts.Clear();
                 decimal total = 0;
+                decimal cash = 0;
+                decimal creditCard = 0;
                 foreach (var checkout in loaded.OrderByDescending(o => o.CheckedOutAt))
                 {
                     Checkouts.Add(checkout);
                     if (checkout.Status == OrderStatus.CheckedOut)
                     {
                         total += checkout.GetTotal();
+                        if (checkout.PaymentMethod == PaymentMethod.Cash)
+                        {
+                            cash += checkout.GetTotal();
+                        }
+                        else if (checkout.PaymentMethod == PaymentMethod.CreditCard || checkout.PaymentMethod == PaymentMethod.PackageOrder)
+                        {
+                            creditCard += checkout.GetTotal();
+                        }
                     }
                 }
                 TotalEarnings = total;
+                CashEarnings = cash;
+                CreditCardEarnings = creditCard;
                 OnPropertyChanged(nameof(FormattedTotalEarnings));
+                OnPropertyChanged(nameof(FormattedCashEarnings));
+                OnPropertyChanged(nameof(FormattedCreditCardEarnings));
             }
         }
 

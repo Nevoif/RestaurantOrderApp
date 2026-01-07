@@ -54,7 +54,7 @@
         <!-- Main Content -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="420"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
@@ -76,8 +76,8 @@
                                     <Button Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.SelectTableCommand}" 
                                             CommandParameter="{Binding Number}"
                                             Margin="0,0,5,10"
-                                            Padding="15,20"
-                                            Width="110"
+                                            Padding="10,15"
+                                            Width="115"
                                             Background="{Binding HasActiveOrder, Converter={StaticResource ActiveOrderConverter}}">
                                         <Button.Style>
                                             <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
@@ -296,7 +296,9 @@
                                 <Button Content="{Binding LocalizedCheckoutCreditCard}" Command="{Binding CheckoutCreditCardCommand}" 
                                         Style="{StaticResource DarkButtonStyle}" Height="45" Background="#0066cc" Margin="0,0,5,0" />
                                 <Button Content="{Binding LocalizedCheckoutCash}" Command="{Binding CheckoutCashCommand}" 
-                                        Style="{StaticResource DarkButtonStyle}" Height="45" Background="#28a745"/>
+                                        Style="{StaticResource DarkButtonStyle}" Height="45" Background="#28a745" Margin="0,0,5,0"/>
+                                <Button Content="{Binding LocalizedCheckoutPackageOrder}" Command="{Binding CheckoutPackageOrderCommand}" 
+                                        Style="{StaticResource DarkButtonStyle}" Height="45" Background="#FF9800"/>
                             </StackPanel>
                             <Button Content="{Binding LocalizedCancelButton}" Command="{Binding CancelCommand}" 
                                     Style="{StaticResource DarkButtonStyle}" Height="45" Background="#dc3545"/>

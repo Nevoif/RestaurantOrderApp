@@ -112,6 +112,7 @@ namespace RestaurantApp.ViewModels
         public string LocalizedQtyLabel => _localization.GetString("QuantityLabel");
         public string LocalizedCheckoutCreditCard => _localization.GetString("CheckoutCreditCardButton");
         public string LocalizedCheckoutCash => _localization.GetString("CheckoutCashButton");
+        public string LocalizedCheckoutPackageOrder => _localization.GetString("CheckoutPackageOrderButton");
         public string LocalizedPrintReceiptButton => _localization.GetString("PrintReceiptButton");
 
         public System.Windows.Input.ICommand SelectTableCommand { get; }
@@ -122,6 +123,7 @@ namespace RestaurantApp.ViewModels
         public System.Windows.Input.ICommand PrintReceiptCommand { get; }
         public System.Windows.Input.ICommand CheckoutCreditCardCommand { get; }
         public System.Windows.Input.ICommand CheckoutCashCommand { get; }
+        public System.Windows.Input.ICommand CheckoutPackageOrderCommand { get; }
         public System.Windows.Input.ICommand CancelCommand { get; }
         public System.Windows.Input.ICommand SettingsCommand { get; }
         public System.Windows.Input.ICommand EarningsCommand { get; }
@@ -137,6 +139,7 @@ namespace RestaurantApp.ViewModels
             PrintReceiptCommand = new RelayCommand(PrintReceipt, _ => SelectedTableOrder != null && SelectedTableOrder.OrderItems.Count > 0);
             CheckoutCreditCardCommand = new RelayCommand(o => CheckoutTableWithPayment(PaymentMethod.CreditCard), _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
             CheckoutCashCommand = new RelayCommand(o => CheckoutTableWithPayment(PaymentMethod.Cash), _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
+            CheckoutPackageOrderCommand = new RelayCommand(o => CheckoutTableWithPayment(PaymentMethod.PackageOrder), _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
             CancelCommand = new RelayCommand(CancelTable, _ => SelectedTableOrder != null && ActiveOrders.Contains(SelectedTableOrder));
             SettingsCommand = new RelayCommand(OpenSettings);
             EarningsCommand = new RelayCommand(OpenEarnings);
@@ -229,11 +232,13 @@ namespace RestaurantApp.ViewModels
                     table.IsSelected = (table.Number == tableNum);
                 }
 
+                var selectedTable = Tables.First(t => t.Number == tableNum);
                 var existingOrder = ActiveOrders.FirstOrDefault(o => o.TableNumber == tableNum);
                 SelectedTableOrder = existingOrder ?? new TableOrder 
                 { 
                     TableNumber = tableNum, 
-                    TableLocation = Tables.First(t => t.Number == tableNum).Location
+                    TableLocation = selectedTable.Location,
+                    TableDisplayName = selectedTable.DisplayName
                 };
             }
         }
@@ -364,6 +369,8 @@ namespace RestaurantApp.ViewModels
             var total = _localization.FormatCurrency(SelectedTableOrder.GetTotal());
             string paymentText = paymentMethod == PaymentMethod.CreditCard 
                 ? _localization.GetString("PaymentMethodCreditCard")
+                : paymentMethod == PaymentMethod.PackageOrder
+                ? "Package Order"
                 : _localization.GetString("PaymentMethodCash");
 
             var result = System.Windows.MessageBox.Show(

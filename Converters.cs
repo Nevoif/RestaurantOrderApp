@@ -185,6 +185,7 @@ namespace RestaurantApp
                 {
                     PaymentMethod.CreditCard => LocalizationService.Instance.GetString("PaymentMethodCreditCard"),
                     PaymentMethod.Cash => LocalizationService.Instance.GetString("PaymentMethodCash"),
+                    PaymentMethod.PackageOrder => "Package Order",
                     _ => LocalizationService.Instance.GetString("PaymentMethodLabel")
                 };
             }
