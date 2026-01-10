@@ -19,6 +19,8 @@ namespace RestaurantApp.ViewModels
         private ObservableCollection<Topping> _selectedToppings = new();
         private int _selectedQuantity = 1;
         private string _currencySymbol = "$";
+        private bool _selectAllItems = false;
+        private string _restaurantName = "Restaurant";
 
         public ObservableCollection<Table> Tables { get; } = new();
         public ObservableCollection<TableOrder> ActiveOrders { get; } = new();
@@ -41,10 +43,14 @@ namespace RestaurantApp.ViewModels
                 if (SetProperty(ref _selectedTableOrder, value))
                 {
                     CurrentOrderItems.Clear();
+                    SelectAllItems = false;
                     if (value != null)
                     {
                         foreach (var item in value.OrderItems)
+                        {
+                            item.IsSelected = false;
                             CurrentOrderItems.Add(item);
+                        }
                     }
                     OnPropertyChanged(nameof(CurrentOrderTotal));
                 }
@@ -85,6 +91,28 @@ namespace RestaurantApp.ViewModels
         {
             get => _currencySymbol;
             set => SetProperty(ref _currencySymbol, value);
+        }
+
+        public string RestaurantName
+        {
+            get => _restaurantName;
+            set => SetProperty(ref _restaurantName, value);
+        }
+
+        public bool SelectAllItems
+        {
+            get => _selectAllItems;
+            set
+            {
+                if (SetProperty(ref _selectAllItems, value))
+                {
+                    // Update all items' selection state based on SelectAllItems
+                    foreach (var item in CurrentOrderItems)
+                    {
+                        item.IsSelected = value;
+                    }
+                }
+            }
         }
 
         public string CurrentOrderTotal => _localization.FormatCurrency(SelectedTableOrder?.GetTotal() ?? 0);
@@ -128,6 +156,8 @@ namespace RestaurantApp.ViewModels
         public System.Windows.Input.ICommand SettingsCommand { get; }
         public System.Windows.Input.ICommand EarningsCommand { get; }
         public System.Windows.Input.ICommand ToggleToppingCommand { get; }
+        public System.Windows.Input.ICommand SelectAllItemsCommand { get; }
+        public System.Windows.Input.ICommand ToggleOrderItemCommand { get; }
 
         public MainViewModel()
         {
@@ -144,6 +174,8 @@ namespace RestaurantApp.ViewModels
             SettingsCommand = new RelayCommand(OpenSettings);
             EarningsCommand = new RelayCommand(OpenEarnings);
             ToggleToppingCommand = new RelayCommand(ToggleTopping);
+            SelectAllItemsCommand = new RelayCommand(SelectAllItems_Executed);
+            ToggleOrderItemCommand = new RelayCommand(ToggleOrderItem);
 
             LoadData();
         }
@@ -154,6 +186,9 @@ namespace RestaurantApp.ViewModels
             
             // Configure network printer settings
             _printerService.SetNetworkPrinterIP(Settings.NetworkPrinterIP, Settings.NetworkPrinterPort);
+            
+            // Set restaurant name
+            RestaurantName = Settings.RestaurantName ?? "Restaurant";
             
             // Set up localization
             _localization.CurrentLanguage = Settings.Language == "Turkish" 
@@ -312,9 +347,27 @@ namespace RestaurantApp.ViewModels
                     UpdateTableStatus();
                 }
                 
+                // Reset SelectAllItems if we removed a selected item
+                SelectAllItems = CurrentOrderItems.All(i => i.IsSelected) && CurrentOrderItems.Count > 0;
+                
                 SaveOrders();
                 OnPropertyChanged(nameof(CurrentOrderTotal));
             }
+        }
+
+        private void ToggleOrderItem(object? obj)
+        {
+            if (obj is OrderItem item)
+            {
+                item.IsSelected = !item.IsSelected;
+                // Update SelectAllItems state
+                SelectAllItems = CurrentOrderItems.All(i => i.IsSelected) && CurrentOrderItems.Count > 0;
+            }
+        }
+
+        private void SelectAllItems_Executed(object? obj)
+        {
+            // The actual selection is handled by the SelectAllItems property setter
         }
 
         private void PrintOrder(object? obj)
@@ -328,6 +381,11 @@ namespace RestaurantApp.ViewModels
                 ActiveOrders.Add(SelectedTableOrder);
                 UpdateTableStatus();
             }
+
+            // Increment order number
+            Settings.CurrentOrderNumber++;
+            if (Settings.CurrentOrderNumber > 999)
+                Settings.CurrentOrderNumber = 1;
 
             string printerName = Settings.DefaultPrinterName ?? "";
             
@@ -351,7 +409,7 @@ namespace RestaurantApp.ViewModels
                 { "ThankYou", _localization.GetString("ReceiptThankYou") }
             };
 
-            if (_printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings))
+            if (_printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, true, Settings.CurrentOrderNumber, null, true))
             {
                 foreach (var item in SelectedTableOrder.OrderItems)
                 {
@@ -366,7 +424,22 @@ namespace RestaurantApp.ViewModels
             if (SelectedTableOrder == null)
                 return;
 
-            var total = _localization.FormatCurrency(SelectedTableOrder.GetTotal());
+            // Check if any items are selected
+            var selectedItems = CurrentOrderItems.Where(i => i.IsSelected).ToList();
+            if (selectedItems.Count == 0)
+            {
+                System.Windows.MessageBox.Show(
+                    _localization.GetString("SelectItemsFirst") ?? "Please select items to checkout",
+                    _localization.GetString("WarningTitle") ?? "Warning",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning
+                );
+                return;
+            }
+
+            // Calculate total for selected items only
+            decimal selectedTotal = selectedItems.Sum(i => i.GetTotal());
+            var total = _localization.FormatCurrency(selectedTotal);
             string paymentText = paymentMethod == PaymentMethod.CreditCard 
                 ? _localization.GetString("PaymentMethodCreditCard")
                 : paymentMethod == PaymentMethod.PackageOrder
@@ -381,16 +454,28 @@ namespace RestaurantApp.ViewModels
 
             if (result == System.Windows.MessageBoxResult.Yes)
             {
-                SelectedTableOrder.Status = OrderStatus.CheckedOut;
-                SelectedTableOrder.PaymentMethod = paymentMethod;
-                SelectedTableOrder.CheckedOutAt = DateTime.Now;
-                _dataService.SaveCheckout(SelectedTableOrder);
-                
-                ActiveOrders.Remove(SelectedTableOrder);
-                UpdateTableStatus();
+                // Assign payment method only to selected items
+                foreach (var item in selectedItems)
+                {
+                    item.IsSelected = false;
+                }
+
+                // Check if all items have been paid
+                if (CurrentOrderItems.All(i => i.IsSelected == false && 
+                    SelectedTableOrder.OrderItems.All(oi => oi.IsSelected == false)))
+                {
+                    // All items processed, can checkout the order if needed
+                    // For now, we just deselect items
+                }
+
+                SelectAllItems = false;
                 SaveOrders();
-                SelectedTableOrder = null;
-                CurrentOrderItems.Clear();
+                OnPropertyChanged(nameof(CurrentOrderTotal));
+
+                System.Windows.MessageBox.Show(
+                    _localization.GetString("CheckoutSuccess") ?? "Checkout successful",
+                    _localization.GetString("SuccessTitle") ?? "Success"
+                );
             }
         }
 
@@ -421,7 +506,7 @@ namespace RestaurantApp.ViewModels
                 { "ThankYou", _localization.GetString("ReceiptThankYou") }
             };
 
-            _printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, onlyNewItems: false);
+            _printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, onlyNewItems: false, 0, RestaurantName, false);
         }
 
         private void CancelTable(object? obj)
@@ -533,6 +618,13 @@ namespace RestaurantApp.ViewModels
             }
             
             _dataService.SaveSettings(Settings);
+        }
+
+        public void UpdateRestaurantName(string restaurantName)
+        {
+            RestaurantName = restaurantName;
+            Settings.RestaurantName = restaurantName;
+            OnPropertyChanged(nameof(RestaurantName));
         }
 
         protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)

@@ -132,7 +132,7 @@
                                                     Style="{StaticResource DarkButtonStyle}">
                                                 <StackPanel HorizontalAlignment="Center">
                                                     <TextBlock Text="{Binding Name}" FontWeight="Bold" TextAlignment="Center"/>
-                                                    <TextBlock Text="{Binding Price, StringFormat='0.00\u20ba'}" Foreground="{StaticResource LightTextBrush}" TextAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Price, StringFormat='0.00 TL'}" Foreground="{StaticResource LightTextBrush}" TextAlignment="Center"/>
                                                 </StackPanel>
                                             </Button>
                                         </DataTemplate>
@@ -162,7 +162,7 @@
                                                 Style="{StaticResource DarkButtonStyle}">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <TextBlock Text="{Binding Name}" FontWeight="Bold" TextAlignment="Center"/>
-                                                <TextBlock Text="{Binding Price, StringFormat='0.00\u20ba'}" Foreground="{StaticResource LightTextBrush}" TextAlignment="Center"/>
+                                                <TextBlock Text="{Binding Price, StringFormat='0.00 TL'}" Foreground="{StaticResource LightTextBrush}" TextAlignment="Center"/>
                                             </StackPanel>
                                         </Button>
                                     </DataTemplate>
@@ -208,12 +208,17 @@
             <!-- Right Panel - Order Summary -->
             <Border Grid.Column="2" Background="{StaticResource SecondaryBrush}" Padding="15" BorderThickness="1,0,0,0" BorderBrush="{StaticResource BorderBrush}">
                 <StackPanel>
+                    <!-- Welcome Message -->
+                    <Border Background="{StaticResource PrimaryBrush}" Padding="15" CornerRadius="8" Margin="0,0,0,15">
+                        <TextBlock Text="{Binding RestaurantName, StringFormat='Welcome to {0}'}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource AccentBrush}" TextAlignment="Center"/>
+                    </Border>
+
                     <!-- Selected Item Info -->
                     <Border Background="{StaticResource PrimaryBrush}" Padding="10" CornerRadius="4" Margin="0,0,0,15">
                         <StackPanel>
                             <TextBlock Text="{Binding LocalizedSelectedItemLabel}" FontWeight="Bold" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding SelectedMenuItem.Name}" FontSize="16"/>
-                            <TextBlock Text="{Binding SelectedMenuItem.Price, StringFormat='0.00\u20ba'}" Foreground="{StaticResource AccentBrush}" FontSize="16"/>
+                            <TextBlock Text="{Binding SelectedMenuItem.Price, StringFormat='0.00 TL'}" Foreground="{StaticResource AccentBrush}" FontSize="16"/>
                             
                             <TextBlock Text="{Binding LocalizedQuantityLabel}" FontWeight="Bold" Margin="0,10,0,5"/>
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
@@ -229,6 +234,14 @@
 
                     <!-- Order Items -->
                     <TextBlock Text="{Binding LocalizedTableOrderLabel}" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    
+                    <!-- Select All Checkbox -->
+                    <CheckBox Margin="0,0,0,10" FontSize="14" Foreground="White"
+                              IsChecked="{Binding SelectAllItems, Mode=TwoWay}"
+                              Command="{Binding SelectAllItemsCommand}">
+                        <TextBlock Text="Select All" Foreground="White" FontSize="14" FontWeight="Bold"/>
+                    </CheckBox>
+                    
                     <ScrollViewer Height="300" VerticalScrollBarVisibility="Auto">
                         <ItemsControl ItemsSource="{Binding CurrentOrderItems}">
                             <ItemsControl.ItemTemplate>
@@ -236,11 +249,17 @@
                                     <Border Background="{StaticResource PrimaryBrush}" Padding="10" Margin="0,0,0,8" CornerRadius="3">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             
-                                            <StackPanel Grid.Column="0">
+                                            <CheckBox Grid.Column="0" Margin="0,0,10,0" VerticalAlignment="Top"
+                                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.ToggleOrderItemCommand}"
+                                                      CommandParameter="{Binding .}"/>
+                                            
+                                            <StackPanel Grid.Column="1">
                                                 <TextBlock Text="{Binding MenuItem.Name}" FontWeight="Bold"/>
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="{Binding DataContext.LocalizedQtyLabel, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" FontSize="11" Foreground="{StaticResource LightTextBrush}"/>
@@ -262,7 +281,7 @@
                                                 </StackPanel>
                                             </StackPanel>
                                             
-                                            <Button Grid.Column="1" Content="✕" 
+                                            <Button Grid.Column="2" Content="✕" 
                                                     Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Window}, Path=DataContext.RemoveFromOrderCommand}"
                                                     CommandParameter="{Binding .}"
                                                     Width="30" Height="30"

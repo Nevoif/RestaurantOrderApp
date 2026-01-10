@@ -95,6 +95,7 @@ namespace RestaurantApp.Models
         private ObservableCollection<Topping> _selectedToppings = new();
         private int _quantity = 1;
         private bool _isPrinted;
+        private bool _isSelected = false;
 
         public int Id
         {
@@ -133,6 +134,12 @@ namespace RestaurantApp.Models
         {
             get => _isPrinted;
             set => SetProperty(ref _isPrinted, value);
+        }
+
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set => SetProperty(ref _isSelected, value);
         }
 
         public decimal Total => GetTotal();
@@ -267,5 +274,7 @@ namespace RestaurantApp.Models
         public List<MenuItem> MenuItems { get; set; } = new();
         public List<Table> Tables { get; set; } = new();
         public string Language { get; set; } = "English"; // language change
+        public string RestaurantName { get; set; } = "Restaurant"; // restaurant name
+        public int CurrentOrderNumber { get; set; } = 0; // order number for printing
     }
 }

@@ -10,7 +10,7 @@ namespace RestaurantApp.Services
         private string _networkPrinterIP = "192.168.1.100";  // Change to your printer's IP
         private int _networkPrinterPort = 9100;  // Standard ESC/POS port
 
-        public bool PrintTableOrder(TableOrder order, string? printerName = null, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null, bool onlyNewItems = true)
+        public bool PrintTableOrder(TableOrder order, string? printerName = null, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null, bool onlyNewItems = true, int orderNumber = 0, string? restaurantName = null, bool includeOrderNumber = false)
         {
             try
             {
@@ -24,7 +24,7 @@ namespace RestaurantApp.Services
                     return false;
                 }
 
-                string receipt = GenerateReceiptText(order, itemsToPrint, currencySymbol, localizedStrings);
+                string receipt = GenerateReceiptText(order, itemsToPrint, currencySymbol, localizedStrings, orderNumber, restaurantName, includeOrderNumber);
 
                 // Try network printing first (for Ethernet printers)
                 if (!string.IsNullOrEmpty(printerName) && printerName.Contains("(Network)"))
@@ -73,11 +73,11 @@ namespace RestaurantApp.Services
             }
         }
 
-        public void PrintReceiptDirect(TableOrder order, string printerName, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null)
+        public void PrintReceiptDirect(TableOrder order, string printerName, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null, string? restaurantName = null)
         {
             try
             {
-                string receiptText = GenerateReceiptText(order, order.OrderItems.ToList(), currencySymbol, localizedStrings);
+                string receiptText = GenerateReceiptText(order, order.OrderItems.ToList(), currencySymbol, localizedStrings, 0, restaurantName, false);
 
                 // Try network printing if it's a network printer
                 if (printerName.Contains("(Network)"))
@@ -166,7 +166,7 @@ namespace RestaurantApp.Services
             _networkPrinterPort = port;
         }
 
-        private string GenerateReceiptText(TableOrder order, List<OrderItem> itemsToPrint, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null)
+        private string GenerateReceiptText(TableOrder order, List<OrderItem> itemsToPrint, string currencySymbol = "$", Dictionary<string, string>? localizedStrings = null, int orderNumber = 0, string? restaurantName = null, bool includeOrderNumber = false)
         {
             const int width = 42;  // Wider receipt (80mm thermal printer standard)
             string header = localizedStrings?.GetValueOrDefault("Header") ?? "RESTAURANT ORDER";
@@ -175,45 +175,69 @@ namespace RestaurantApp.Services
             string totalLabel = localizedStrings?.GetValueOrDefault("Total") ?? "TOTAL";
             string thankYou = localizedStrings?.GetValueOrDefault("ThankYou") ?? "THANK YOU!";
 
-            var lines = new List<string>
+            var lines = new List<string>();
+            
+            // Add restaurant name if provided and for receipt (includeOrderNumber false)
+            if (!string.IsNullOrEmpty(restaurantName) && !includeOrderNumber)
             {
-                "================================",
-                CenterText(header, width),
-                "================================",
-                "",
-                $"{tableLabel}: {order.TableDisplayName}",
-                $"{timeLabel}: {order.OrderedAt:dd/MM/yyyy HH:mm:ss}",
-                "",
-                "--------------------------------"
-            };
+                lines.Add("================================");
+                lines.Add(CenterText(restaurantName, width));
+                lines.Add("================================");
+                lines.Add("");
+            }
+            
+            lines.Add("================================");
+            lines.Add(CenterText(header, width));
+            
+            // Add order number if needed (for YAZDIR)
+            if (includeOrderNumber && orderNumber > 0)
+            {
+                lines.Add($"Order #: {orderNumber}");
+            }
+            
+            lines.Add("================================");
+            lines.Add("");
+            lines.Add($"{tableLabel}: {order.TableDisplayName}");
+            lines.Add($"{timeLabel}: {order.OrderedAt:dd/MM/yyyy HH:mm:ss}");
+            lines.Add("");
+            lines.Add("--------------------------------");
 
             foreach (OrderItem item in itemsToPrint)
             {
                 string itemLine = $"{item.Quantity}x {item.MenuItem.Name}";
-                if (itemLine.Length > width - 12)
-                    itemLine = itemLine.Substring(0, width - 15) + "...";
-
-                string pricePart = currencySymbol == "$" ? $"${item.MenuItem.Price}" : $"{item.MenuItem.Price}";
-                lines.Add($"{itemLine,-28}"); //deleted pricePart,12
-
+                
+                string itemPrice = currencySymbol == "$" ? $"${item.MenuItem.Price:F2}" : $"{item.MenuItem.Price:F2} TL";
+                
+                // Format: "3x Kompir                  50.00 TL" (reduced spacing by 5)
+                string pricedLine = $"{itemLine} {itemPrice}";
+                if (pricedLine.Length > width)
+                    pricedLine = itemLine.Substring(0, Math.Max(1, width - itemPrice.Length - 3)) + "..." + itemPrice;
+                else
+                    pricedLine = itemLine + new string(' ', Math.Max(1, width - itemLine.Length - itemPrice.Length - 5)) + itemPrice;
+                
+                lines.Add(pricedLine);
 
                 if (item.SelectedToppings.Count > 0)
                 {
                     foreach (Topping topping in item.SelectedToppings)
                     {
                         string toppingLine = $"  + {topping.Name}";
-                        if (toppingLine.Length > width - 12)
-                            toppingLine = toppingLine.Substring(0, width - 15) + "...";
-
-                        string toppingPricePart = currencySymbol == "$" ? $"${topping.Price}" : $"{topping.Price} {currencySymbol}"; //deleted :F2 after topping.Price
-                        lines.Add($"{toppingLine,-28} "); // DeletedtoppingPricePart,12
+                        string toppingPrice = currencySymbol == "$" ? $"${topping.Price:F2}" : $"{topping.Price:F2} TL";
+                        
+                        string pricedToppingLine = $"{toppingLine} {toppingPrice}";
+                        if (pricedToppingLine.Length > width)
+                            pricedToppingLine = toppingLine.Substring(0, Math.Max(1, width - toppingPrice.Length - 3)) + "..." + toppingPrice;
+                        else
+                            pricedToppingLine = toppingLine + new string(' ', Math.Max(1, width - toppingLine.Length - toppingPrice.Length - 5)) + toppingPrice;
+                        
+                        lines.Add(pricedToppingLine);
                     }
                 }
             }
 
             lines.Add("-------------------------------");
             decimal total = itemsToPrint.Sum(i => i.GetTotal());
-            string totalAmountStr = currencySymbol == "$" ? $"${total}" : $"{total} {currencySymbol}"; //deleted :F2 after total 2 times.
+            string totalAmountStr = currencySymbol == "$" ? $"${total:F2}" : $"{total:F2} TL";
             string totalLine = $"{totalLabel}: {totalAmountStr}";
             lines.Add(totalLine.PadLeft(width));
             lines.Add("================================");

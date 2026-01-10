@@ -18,6 +18,7 @@ namespace RestaurantApp.ViewModels
         private string _networkPrinterIP = "192.168.1.100";
         private int _networkPrinterPort = 9100;
         private string _selectedLanguage = "English";
+        private string _restaurantName = "Restaurant";
         private ObservableCollection<string> _availablePrinters = new();
         private ObservableCollection<string> _availableLanguages = new() { "English", "Turkish" };
 
@@ -60,6 +61,12 @@ namespace RestaurantApp.ViewModels
         {
             get => _selectedLanguage;
             set => SetProperty(ref _selectedLanguage, value);
+        }
+
+        public string RestaurantName
+        {
+            get => _restaurantName;
+            set => SetProperty(ref _restaurantName, value);
         }
 
         public ObservableCollection<string> AvailablePrinters
@@ -149,6 +156,7 @@ namespace RestaurantApp.ViewModels
             NetworkPrinterIP = settings.NetworkPrinterIP ?? "192.168.1.100";
             NetworkPrinterPort = settings.NetworkPrinterPort > 0 ? settings.NetworkPrinterPort : 9100;
             SelectedLanguage = settings.Language ?? "English";
+            RestaurantName = settings.RestaurantName ?? "Restaurant";
 
             foreach (var item in settings.MenuItems)
                 MenuItems.Add(item);
@@ -249,11 +257,13 @@ namespace RestaurantApp.ViewModels
             _settings.NetworkPrinterIP = NetworkPrinterIP;
             _settings.NetworkPrinterPort = NetworkPrinterPort;
             _settings.Language = SelectedLanguage;
+            _settings.RestaurantName = RestaurantName;
             _settings.MenuItems = MenuItems.ToList();
             _settings.Tables = Tables.ToList();
 
             _dataService.SaveSettings(_settings);
             _mainViewModel.UpdateLanguage(SelectedLanguage);
+            _mainViewModel.UpdateRestaurantName(RestaurantName);
             System.Windows.MessageBox.Show("Settings saved successfully!");
         }
 
