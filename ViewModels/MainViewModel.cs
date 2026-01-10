@@ -48,6 +48,14 @@ namespace RestaurantApp.ViewModels
                     {
                         foreach (var item in value.OrderItems)
                         {
+                            // Subscribe to item selection changes
+                            item.PropertyChanged += (s, e) =>
+                            {
+                                if (e.PropertyName == nameof(OrderItem.IsSelected))
+                                {
+                                    SelectAllItems = CurrentOrderItems.All(i => i.IsSelected) && CurrentOrderItems.Count > 0;
+                                }
+                            };
                             item.IsSelected = false;
                             CurrentOrderItems.Add(item);
                         }
@@ -315,6 +323,15 @@ namespace RestaurantApp.ViewModels
                 SelectedToppings = new ObservableCollection<Topping>(SelectedToppings)
             };
 
+            // Subscribe to item selection changes
+            newItem.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(OrderItem.IsSelected))
+                {
+                    SelectAllItems = CurrentOrderItems.All(i => i.IsSelected) && CurrentOrderItems.Count > 0;
+                }
+            };
+
             SelectedTableOrder.OrderItems.Add(newItem);
             CurrentOrderItems.Add(newItem);
 
@@ -454,18 +471,20 @@ namespace RestaurantApp.ViewModels
 
             if (result == System.Windows.MessageBoxResult.Yes)
             {
-                // Assign payment method only to selected items
-                foreach (var item in selectedItems)
+                // Remove only selected items from the order
+                foreach (var item in selectedItems.ToList())
                 {
-                    item.IsSelected = false;
+                    SelectedTableOrder.OrderItems.Remove(item);
+                    CurrentOrderItems.Remove(item);
                 }
 
-                // Check if all items have been paid
-                if (CurrentOrderItems.All(i => i.IsSelected == false && 
-                    SelectedTableOrder.OrderItems.All(oi => oi.IsSelected == false)))
+                // If all items have been paid and removed, clean up the order
+                if (SelectedTableOrder.OrderItems.Count == 0)
                 {
-                    // All items processed, can checkout the order if needed
-                    // For now, we just deselect items
+                    ActiveOrders.Remove(SelectedTableOrder);
+                    UpdateTableStatus();
+                    SelectedTableOrder = null;
+                    CurrentOrderItems.Clear();
                 }
 
                 SelectAllItems = false;

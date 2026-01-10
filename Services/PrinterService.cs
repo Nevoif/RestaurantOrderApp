@@ -208,12 +208,13 @@ namespace RestaurantApp.Services
                 
                 string itemPrice = currencySymbol == "$" ? $"${item.MenuItem.Price:F2}" : $"{item.MenuItem.Price:F2} TL";
                 
-                // Format: "3x Kompir                  50.00 TL" (reduced spacing by 5)
-                string pricedLine = $"{itemLine} {itemPrice}";
-                if (pricedLine.Length > width)
+                // Calculate spacing to prevent wrapping
+                int availableSpace = width - itemLine.Length - itemPrice.Length - 5;
+                string pricedLine;
+                if (availableSpace < 1)
                     pricedLine = itemLine.Substring(0, Math.Max(1, width - itemPrice.Length - 3)) + "..." + itemPrice;
                 else
-                    pricedLine = itemLine + new string(' ', Math.Max(1, width - itemLine.Length - itemPrice.Length - 5)) + itemPrice;
+                    pricedLine = itemLine + new string(' ', availableSpace) + itemPrice;
                 
                 lines.Add(pricedLine);
 
@@ -224,11 +225,12 @@ namespace RestaurantApp.Services
                         string toppingLine = $"  + {topping.Name}";
                         string toppingPrice = currencySymbol == "$" ? $"${topping.Price:F2}" : $"{topping.Price:F2} TL";
                         
-                        string pricedToppingLine = $"{toppingLine} {toppingPrice}";
-                        if (pricedToppingLine.Length > width)
+                        int toppingAvailableSpace = width - toppingLine.Length - toppingPrice.Length - 5;
+                        string pricedToppingLine;
+                        if (toppingAvailableSpace < 1)
                             pricedToppingLine = toppingLine.Substring(0, Math.Max(1, width - toppingPrice.Length - 3)) + "..." + toppingPrice;
                         else
-                            pricedToppingLine = toppingLine + new string(' ', Math.Max(1, width - toppingLine.Length - toppingPrice.Length - 5)) + toppingPrice;
+                            pricedToppingLine = toppingLine + new string(' ', toppingAvailableSpace) + toppingPrice;
                         
                         lines.Add(pricedToppingLine);
                     }
