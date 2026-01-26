@@ -1,23 +1,21 @@
 Restaurant Order Management System
 
-this is a Windows App for
-Restaurant order management system using .Net 8
+A Windows-based Restaurant Order Management System built with .NET 8, developed for real-world use in a small restaurant environment.
 
-as you can guess for some versions you need .net 8 installed.
+The application handles order tracking and payment records, including:
 
-some files you install are already ready to work out of box, usually the latest releases
+payment method
 
-highly experimental
+payment amount
 
-**AI** was used to make the ui btw code is not entirely mine (big sin)
+payment timestamp
 
-it might look like a mess but it works
+Application settings and persistent data are stored in JSON files, keeping the system lightweight and easy to modify or extend.
 
-feel free to copy and modify the code as you wish.
-this was made for personal use for a relative's restaurant.
+Some releases require .NET 8 to be installed, while the latest versions are packaged to work out of the box.
 
-hope it helps.
+⚠️ This project is experimental and was built for personal use for a relative’s restaurant.
+The UI was partially generated with AI assistance, while the application logic and system behavior were implemented by me.
 
-It saves how the payment was made, when was made, how much was made.
-
-settings and data both are json files
+The codebase may look rough in places, but it is functional and actively used.
+Feel free to copy, modify, or adapt it to your own needs.
