@@ -110,9 +110,19 @@ namespace RestaurantApp.Services
                     string monthlyJson = File.ReadAllText(monthlyFile);
                     monthlyCheckouts = JsonSerializer.Deserialize<List<TableOrder>>(monthlyJson) ?? new();
                 }
-                monthlyCheckouts.Add(order);
-                string updatedMonthlyJson = JsonSerializer.Serialize(monthlyCheckouts, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(monthlyFile, updatedMonthlyJson);
+
+                // Prevent duplicate entries - check if this exact order already exists
+                bool isDuplicate = monthlyCheckouts.Any(o =>
+                    o.TableNumber == order.TableNumber &&
+                    o.CheckedOutAt.HasValue && order.CheckedOutAt.HasValue &&
+                    o.CheckedOutAt.Value.ToString("yyyyMMdd_HHmmss") == order.CheckedOutAt.Value.ToString("yyyyMMdd_HHmmss"));
+
+                if (!isDuplicate)
+                {
+                    monthlyCheckouts.Add(order);
+                    string updatedMonthlyJson = JsonSerializer.Serialize(monthlyCheckouts, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(monthlyFile, updatedMonthlyJson);
+                }
             }
             catch (Exception ex)
             {

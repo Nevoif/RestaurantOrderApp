@@ -115,7 +115,7 @@ namespace RestaurantApp.ViewModels
                 if (SetProperty(ref _selectAllItems, value))
                 {
                     // Update all items' selection state based on SelectAllItems
-                    foreach (var item in CurrentOrderItems)
+                    foreach (var item in CurrentOrderItems.ToList())
                     {
                         item.IsSelected = value;
                     }
@@ -399,13 +399,8 @@ namespace RestaurantApp.ViewModels
                 UpdateTableStatus();
             }
 
-            // Increment order number
-            Settings.CurrentOrderNumber++;
-            if (Settings.CurrentOrderNumber > 999)
-                Settings.CurrentOrderNumber = 1;
-
             string printerName = Settings.DefaultPrinterName ?? "";
-            
+
             if (string.IsNullOrEmpty(printerName))
             {
                 var printers = _printerService.GetAvailablePrinters();
@@ -426,13 +421,22 @@ namespace RestaurantApp.ViewModels
                 { "ThankYou", _localization.GetString("ReceiptThankYou") }
             };
 
-            if (_printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, true, Settings.CurrentOrderNumber, null, true))
+            // Get current order number for printing before incrementing
+            int currentOrderNumber = Settings.CurrentOrderNumber;
+
+            if (_printerService.PrintTableOrder(SelectedTableOrder, printerName, CurrencySymbol, receiptStrings, true, currentOrderNumber, null, true))
             {
+                // Only increment after successful print
+                Settings.CurrentOrderNumber++;
+                if (Settings.CurrentOrderNumber > 999)
+                    Settings.CurrentOrderNumber = 1;
+
                 foreach (var item in SelectedTableOrder.OrderItems)
                 {
                     item.IsPrinted = true;
                 }
                 SaveOrders();
+                _dataService.SaveSettings(Settings);
             }
         }
 
@@ -457,7 +461,7 @@ namespace RestaurantApp.ViewModels
             // Calculate total for selected items only
             decimal selectedTotal = selectedItems.Sum(i => i.GetTotal());
             var total = _localization.FormatCurrency(selectedTotal);
-            string paymentText = paymentMethod == PaymentMethod.CreditCard 
+            string paymentText = paymentMethod == PaymentMethod.CreditCard
                 ? _localization.GetString("PaymentMethodCreditCard")
                 : paymentMethod == PaymentMethod.PackageOrder
                 ? "Package Order"
@@ -471,6 +475,30 @@ namespace RestaurantApp.ViewModels
 
             if (result == System.Windows.MessageBoxResult.Yes)
             {
+                // Create a transaction record for paid items (for partial checkouts)
+                if (selectedItems.Count > 0)
+                {
+                    var transactionRecord = new TableOrder
+                    {
+                        TableNumber = SelectedTableOrder.TableNumber,
+                        TableLocation = SelectedTableOrder.TableLocation,
+                        TableDisplayName = SelectedTableOrder.TableDisplayName,
+                        Status = OrderStatus.CheckedOut,
+                        CheckedOutAt = DateTime.Now,
+                        PaymentMethod = paymentMethod,
+                        OrderedAt = SelectedTableOrder.OrderedAt
+                    };
+
+                    // Add selected items to the transaction record
+                    foreach (var item in selectedItems)
+                    {
+                        transactionRecord.OrderItems.Add(item);
+                    }
+
+                    // Save this transaction to checkouts directory
+                    _dataService.SaveCheckout(transactionRecord);
+                }
+
                 // Remove only selected items from the order
                 foreach (var item in selectedItems.ToList())
                 {
